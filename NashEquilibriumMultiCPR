@@ -1,0 +1,97 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Sep  5 06:36:09 2021
+
+@author: Juan Alvarado
+"""
+
+import numpy as np
+from scipy.optimize import minimize
+from scipy.optimize import Bounds
+
+"""
+This program compute the nash equilibium of a Multi-CPR game
+when R(x_T) = 2 + x_T. Thus the utility function for first player has the form
+ 
+u_1(x_1, ...,x_10) = sum_i^5 x_i * (1 - (x_i + x_i+5 )**2  - (x_i + x_i+5 ))
+
+Every nash equilibrium is a local maximum of u_1(x_1, ...,x_10) under the constrains µ
+
+1) u_1(x_1, ...,x_10)  = u_2(x_1, ...,x_10) 
+2 ) x_i \in [0,1]
+3) x_1+...x_5 <= 1
+4) x_6+...x_10 <= 1
+
+"""
+
+
+
+def utility(x):
+
+    """Utility function """
+    d = 0 
+    for i in range(5):
+        d = d - x[i] * (1 - (x[i]+x[i+5] )**2  - (x[i]+x[i+5] ))
+    
+    return d 
+
+def utility_grad(x):
+
+    grad = np.zeros_like(x)
+    for i in range(5):
+        grad[i] =   - ((1 - (x[i]+x[i+5] )**2  - (x[i]+x[i+5] )) 
+        - x[i] * (2*x[i]+2*x[i+5]-1) )
+            
+    return grad
+
+
+def cons1(x):
+    d = 0 
+    for i in range(5):
+        d = d + ( x[i] - x[i+5] ) * (1 - (x[i]+x[i+5] )**2  - (x[i]+x[i+5] ))
+        
+    return d 
+
+
+def cons1_grad(x):
+    grad = np.zeros_like(x)
+    for i in range(5):
+        grad[i] =   (1 - (x[i]+x[i+5] )**2  - (x[i]+x[i+5] )) 
+        - x[i] * (2*x[i]+2*x[i+5]-1)
+
+    for i in range(5):
+        grad[i+5] =  -( (1 - (x[i]+x[i+5] )**2  - (x[i]+x[i+5] )) 
+        - x[i+5] * (2*x[i]+2*x[i+5]-1) )
+        
+    return grad
+
+bounds = Bounds([0 for n in range(10)], [1 for n in range(10)])
+
+ineq_cons1 = {'type': 'ineq',
+             'fun' : lambda x: 1 - x[0] - x[1]- x[2]- x[3]- x[4]  ,
+             'jac' : lambda x:  np.array([-1.0, -1.0, -1.0, -1.0, -1.0, 0,0,0,0,0] )             
+                                         }
+
+
+ineq_cons2 = {'type': 'ineq',
+             'fun' : lambda x:  1 - x[5] - x[6]- x[7]- x[8]- x[9]  ,
+             'jac' : lambda x: np.array([[0,0,0,0,0, -1.0, -1.0, -1.0, -1.0, -1.0]] )                                    
+                                         }
+
+eq_cons1 = {'type': 'eq',
+           'fun' : cons1,
+           'jac' :  cons1_grad }
+
+
+x0 = np.array([0.5, 0])
+x1 = np.random.rand(10,) 
+
+res = minimize(utility, x1, method='SLSQP', jac=utility_grad,
+               constraints=[ineq_cons1, ineq_cons2, eq_cons1], options={'ftol': 1e-9, 'disp': True},
+               bounds=bounds)
+
+print('Uyility for the first and second players', -res.fun)
+print('Solution for the first player', res.x[0:5])
+print('Solution for the second player', res.x[5:10])
+print('Total investment for the first player', sum(res.x[0:5]))
+print('Total investment for the second player', sum(res.x[5:10]))
