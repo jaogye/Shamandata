@@ -1,0 +1,9 @@
+{
+	"name": "cursojaoxxx3",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "ab532815-9f26-403b-ac0a-685a2c25553e",
+		"tenantId": "d964c191-0d3f-4ae5-80c8-ccabee31943f"
+	}
+}
