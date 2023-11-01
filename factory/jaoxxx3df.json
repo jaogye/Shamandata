@@ -1,0 +1,9 @@
+{
+	"name": "jaoxxx3df",
+	"location": "westeurope",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "c51810dc-dc74-433f-8f4d-17a00b532565",
+		"tenantId": "d964c191-0d3f-4ae5-80c8-ccabee31943f"
+	}
+}
